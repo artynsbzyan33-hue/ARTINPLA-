@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTIN PLA | طراحی وب‌سایت حرفه‌ای، مدرن و هنری</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font: Vazirmatn -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Icons: Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#76FF03', 600: '#4c9a00', 700: '#3a7700', 900: '#1f4300' },
+                        accent: { 500: '#f43f5e' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; }
+        
+        /* استایل عکس پروفایل کاربر */
+        .profile-pic-upload-container {
+            position: relative; width: 80px; height: 80px; margin: 0 auto;
+            border-radius: 50%; overflow: hidden; background-color: #e5e7eb;
+            border: 2px dashed #d1d5db; cursor: pointer; transition: all 0.3s ease;
+        }
+        .profile-pic-upload-container:hover { border-color: #76FF03; }
+        .profile-pic-upload-container img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-pic-upload-container input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        /* ===============================
+           افکت طناب نوری (Light Rope)
+           =============================== */
+        .light-rope-wrapper { position: relative; display: inline-block; }
+        .light-rope-svg {
+            position: absolute; bottom: -2px; left: 0;
+            width: 100%; height: 4px; pointer-events: none; overflow: visible;
+        }
+        .light-rope-path {
+            fill: none; stroke: #76FF03; stroke-width: 2; stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear;
+            stroke-dasharray: 1000; stroke-dashoffset: 1000;
+            filter: drop-shadow(0 0 6px #76FF03);
+        }
+        .light-rope-wrapper:hover .light-rope-path {
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+        }
+        
+        /* ===============================
+           استایل دکمه نئونی
+           =============================== */
+        .btn-neon {
+            background-color: #76FF03; color: #0b0907;
+            box-shadow: 0 4px 14px rgba(118, 255, 3, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-neon:hover {
+            background-color: #66dd03; box-shadow: 0 8px 24px rgba(118, 255, 3, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* استایل دراپ‌داون جستجو */
+        #searchDropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
+            z-index: 50;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        #searchDropdown::-webkit-scrollbar { width: 6px; }
+        #searchDropdown::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+        /* ===============================
+           استایل کارت 3D (Tilt Card) - بانکی
+           =============================== */
+        .card-slot {
+            perspective: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            width: 100%;
+            max-width: 380px;
+            height: 240px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            cursor: default;
+        }
+        .card.tilt { transition: transform 0.1s ease-out; }
+        .glow.glow-ok {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border-radius: 20px;
+            box-shadow: 0 0 26px 4px #76FF03, 0 0 62px 18px rgba(118, 255, 3, 0.4);
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+        .card_inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card_inner.is-flipped { transform: rotateY(180deg); }
+        .card_face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .card_face-front {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: white;
+        }
+        .card_face-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 24px 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-brand {
+            font-size: 1.6rem; font-weight: 900; letter-spacing: 0.05em; color: #ffffff;
+            text-shadow: 0 0 15px rgba(118, 255, 3, 0.4); margin-bottom: 4px;
+        }
+        .card-brand-sub { font-size: 0.55rem; color: #76FF03; letter-spacing: 0.2em; margin-top: -6px; margin-bottom: 10px; }
+        .card-number-wrapper { display: flex; justify-content: center; align-items: center; margin: 8px 0; }
+        .card-number { font-family: 'Courier New', monospace; font-size: 1.4rem; font-weight: 600; letter-spacing: 3px; color: #e2e8f0; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
+        .card-holder-section { display: flex; align-items: center; gap: 14px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; }
+        .card-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #76FF03; object-fit: cover; box-shadow: 0 0 15px rgba(118, 255, 3, 0.2); }
+        .card-holder-details { flex: 1; display: flex; flex-direction: column; }
+        .card-holder-name { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
+        .card-holder-tag { font-size: 0.6rem; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; }
+        .card-chip { width: 42px; height: 32px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 6px; align-self: flex-end; margin-top: -10px; }
+
+        .card-back-title { font-size: 0.7rem; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+        .card-back-email { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; word-break: break-all; }
+        .card-magnetic { height: 40px; background: #1e293b; margin: 12px 0; border-radius: 4px; border: 1px solid #334155; }
+
+        /* ===============================
+           استایل پیام (Toast)
+           =============================== */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+        }
+        .toast-item {
+            pointer-events: auto;
+            background-color: #0f172a;
+            border: 1px solid #76FF03;
+            color: #ffffff;
+            padding: 14px 24px;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(118, 255, 3, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+        }
+        .toast-item.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- TOP BAR -->
+    <div class="bg-brand-900 text-white text-xs py-2 px-4 text-center hidden md:block">
+        <span>🚀 مشاوره رایگان طراحی سایت برای برندهای مدرن | همین حالا از طریق اینستاگرام یا روبیکا پیام دهید</span>
+    </div>
+
+    <!-- HEADER SECTION -->
+    <header class="sticky top-0 z-50 bg-white shadow-sm transition-all duration-300" id="main-header">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center gap-4 justify-between relative">
+            
+            <!-- ردیف اول: لوگو، جستجو و دکمه‌های کاربر -->
+            <div class="flex flex-col md:flex-row w-full items-center justify-between gap-4">
+                
+                <!-- Logo -->
+                <div class="flex items-center w-full md:w-auto justify-between md:justify-start gap-4">
+                    <button class="md:hidden text-2xl text-gray-600"><i class="ri-menu-line"></i></button>
+                    <a href="#" class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-black rounded-xl overflow-hidden flex items-center justify-center border-2 border-brand-500">
+                            <img src="https://i.postimg.cc/6qBX47HK/IMG-20260807-101050-346.jpg" alt="ARTIN PLA Logo" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-black text-gray-900 tracking-tighter leading-none">ARTIN PLA</h1>
+                            <p class="text-[10px] text-brand-600 font-bold">طراحی وب‌سایت · مدرن و هنری</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="light-rope-wrapper w-full md:flex-1 max-w-2xl relative group hidden md:block">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="جستجو در خدمات..." 
+                            class="w-full bg-gray-100 border border-transparent focus:border-brand-500 focus:bg-white rounded-xl py-3 pr-12 pl-4 transition-all outline-none text-sm text-gray-700 autocomplete-off">
+                        <i class="ri-search-line absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-600"></i>
+                        <svg class="light-rope-svg" viewBox="0 0 100 10" preserveAspectRatio="none">
+                            <path id="lightRopeLine" class="light-rope-path" d="M 0 5 L 100 5" />
+                        </svg>
+                        <div id="searchDropdown" class="hidden p-2"></div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="hidden md:flex items-center gap-3 relative">
+                    <div id="loginActions">
+                        <button onclick="openLoginModal()" class="flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 group">
+                            <i class="ri-user-line text-lg group-hover:text-brand-600 transition-colors"></i>
+                            <span>ورود</span>
+                        </button>
+                    </div>
+                    
+                    <div id="loggedInActions" class="hidden flex items-center gap-3 bg-gray-100 rounded-xl px-3 py-1.5 border border-gray-200 cursor-pointer" onclick="openProfileModal()">
+                        <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-300 border border-brand-500 flex-shrink-0">
+                            <img id="userProfileImg" src="" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <span id="loggedInUsername" class="text-sm font-bold text-gray-700"></span>
+                        <button onclick="event.stopPropagation(); logout()" class="text-xs text-gray-500 hover:text-red-500 transition-colors">
+                            <i class="ri-logout-box-r-line text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- دکمه پروژه جدید (تغییر یافته) -->
+                    <button onclick="openProjectRequest()" class="btn-neon flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium">
+                        <i class="ri-file-list-3-line text-lg"></i>
+                        <span>پروژه جدید</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- پنل دسترسی سریع -->
+            <div class="hidden md:flex items-center gap-2 w-full justify-end mt-2 px-1">
+                <span class="text-[10px] text-gray-400 ml-2">دسترسی سریع:</span>
+                <a href="#about" class="text-[10px] bg-gray-100 hover:bg-brand-500 hover:text-white transition-colors px-3 py-1 rounded-full text-gray-600 font-medium">درباره ما</a>
+                <a href="#works" class="text-[10px] bg-gray-100 hover:bg-brand-500 hover:text-white transition-colors px-3 py-1 rounded-full text-gray-600 font-medium">نمونه‌کارها</a>
+                <a href="#contact" class="text-[10px] bg-gray-100 hover:bg-brand-500 hover:text-white transition-colors px-3 py-1 rounded-full text-gray-600 font-medium">تماس با ما</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container mx-auto px-4 py-6 space-y-8">
+
+        <!-- HERO SLIDER -->
+        <section id="works" class="rounded-2xl overflow-hidden shadow-soft relative group h-[300px] md:h-[450px] scroll-mt-32">
+            <div class="swiper hero-swiper h-full w-full">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide relative">
+                        <img src="https://i.postimg.cc/gkP3dK2z/image-8b63e044-14d8-4741-aca0-e519e6d3b6c5.jpg" alt="ARTIN PLA" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center px-10 md:px-20">
+                            <div class="max-w-xl text-white space-y-4">
+                                <span class="bg-brand-500 text-black px-3 py-1 rounded-full text-xs font-bold">هنر + تکنولوژی</span>
+                                <h2 class="text-3xl md:text-5xl font-black leading-tight">طراحی وب‌سایت<br>با رویکرد هنری</h2>
+                                <p class="text-gray-200 text-sm md:text-base">تلفیق کنتراست بالا، نور نئونی و تایپوگرافی قدرتمند.</p>
+                                <a href="#contact" class="btn-neon px-6 py-3 rounded-lg font-bold text-sm inline-block">دریافت مشاوره</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide relative">
+                        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center px-10 md:px-20">
+                            <div class="max-w-xl text-white space-y-4">
+                                <span class="bg-accent-500 px-3 py-1 rounded-full text-xs font-bold">برندینگ</span>
+                                <h2 class="text-3xl md:text-5xl font-black leading-tight">هویت بصری سینمایی</h2>
+                                <a href="#contact" class="bg-white text-gray-900 px-6 py-3 rounded-lg font-bold text-sm inline-block">شروع پروژه</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-button-next hidden md:flex"></div>
+                <div class="swiper-button-prev hidden md:flex"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section id="about" class="bg-white p-6 md:p-10 rounded-2xl shadow-soft text-center border-r-4 border-brand-500 scroll-mt-32">
+            <h3 class="text-2xl font-black text-gray-800">«آرتین پی ال ای» چیه؟</h3>
+            <p class="text-gray-600 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
+                <span class="font-bold text-brand-600">ARTIN PLA</span> تلفیقی از <span class="font-bold">هنر (Art)</span> و <span class="font-bold">تکنولوژی (Tech)</span> است. ما روی طراحی سایت، هویت بصری و تایپوگرافی با رویکردی سینمایی و تاریک تمرکز داریم. فضای تیره، کنتراست بالا و اکسنت سبز نئونی، امضای بصری ماست.
+            </p>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section id="contact" class="bg-white p-6 md:p-10 rounded-2xl shadow-soft text-center scroll-mt-32">
+            <h2 class="text-3xl font-black text-gray-800 mb-4">آماده‌ایم برای ساخت نسخه نهایی برند شما</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="https://www.instagram.com/artinpla?igsh=eW1mamJscGpnNzhs" target="_blank" class="flex items-center gap-3 px-6 py-3 bg-gray-900 text-white rounded-xl font-bold transition-transform hover:-translate-y-1 border border-gray-800">
+                    <i class="ri-instagram-line text-xl text-brand-500"></i> پیام در اینستاگرام
+                </a>
+                <a href="https://rubika.ir/artin_pla" target="_blank" class="flex items-center gap-3 px-6 py-3 btn-neon rounded-xl font-bold">
+                    <i class="ri-message-2-line text-xl"></i> پیام در روبیکا
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-white/70 py-8 border-t border-gray-800 text-center">
+        <span>© 2026 ARTIN PLA · Dark Visual Identity</span>
+    </footer>
+
+    <!-- MODAL ورود -->
+    <div id="loginModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 relative">
+            <button onclick="closeLoginModal()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+            <div class="text-center">
+                <h3 class="text-2xl font-black text-gray-800">ورود به حساب کاربری</h3>
+            </div>
+            <form onsubmit="event.preventDefault(); login();" class="space-y-4">
+                <div class="flex flex-col items-center gap-2">
+                    <div class="profile-pic-upload-container">
+                        <img id="profilePicPreview" src="https://ui-avatars.com/api/?name=User&background=random&size=128" alt="Profile Preview">
+                        <input type="file" id="profilePicUpload" accept="image/*" onchange="handleProfilePicUpload(event)">
+                    </div>
+                    <span class="text-[10px] text-gray-400">برای انتخاب عکس کلیک کنید</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">ایمیل</label>
+                    <input type="email" id="email" placeholder="example@domain.com" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-brand-500" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">نام کاربری</label>
+                    <input type="text" id="username" placeholder="نام کاربری خود را وارد کنید" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-brand-500" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">رمز عبور</label>
+                    <input type="password" id="password" placeholder="********" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-brand-500" required>
+                </div>
+                <button type="submit" class="btn-neon w-full py-3 rounded-xl font-bold text-sm">ورود به سایت</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL پروفایل کاربر -->
+    <div id="profileModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-6 relative">
+            <button onclick="closeProfileModal()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+            <div class="text-center">
+                <h3 class="text-2xl font-black text-gray-800 mb-4">حساب کاربری من</h3>
+            </div>
+            
+            <div class="card-slot">
+                <div class="card tilt" id="profileCard">
+                    <div class="glow glow-ok"></div>
+                    <div class="card_inner" id="cardInner">
+                        <div class="card_face card_face-front">
+                            <div class="flex justify-between items-start">
+                                <div class="card-chip"></div>
+                                <div class="text-left">
+                                    <div class="card-brand">ARTINPLA</div>
+                                    <div class="card-brand-sub">SECURE DIGITAL CARD</div>
+                                </div>
+                            </div>
+                            <div class="card-number-wrapper">
+                                <div class="card-number" id="cardNumber">**** **** **** 1234</div>
+                            </div>
+                            <div class="card-holder-section">
+                                <img id="profileCardImg" src="" alt="Profile" class="card-avatar">
+                                <div class="card-holder-details">
+                                    <div class="card-holder-name" id="profileCardName">کاربر</div>
+                                    <div class="card-holder-tag">CARD HOLDER</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card_face card_face-back">
+                            <div>
+                                <div class="card-back-title">ایمیل اصلی</div>
+                                <div class="card-back-email" id="profileCardEmail">example@domain.com</div>
+                            </div>
+                            <div class="card-magnetic"></div>
+                            <div class="flex flex-col gap-2 mt-2">
+                                <button onclick="saveProfile()" class="btn-neon w-full py-2 rounded-xl text-sm font-bold">ذخیره تغییرات</button>
+                                <button onclick="deleteAccount()" class="text-xs text-red-400 hover:text-red-600 transition-colors font-bold">حذف حساب کاربری</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="flipCard()" class="mt-4 text-xs text-brand-600 font-bold hover:underline cursor-pointer block mx-auto">🔃 چرخاندن کارت</button>
+            </div>
+
+            <div class="border-t border-gray-100 pt-4 mt-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-gray-700">ایمیل‌های اضافی</span>
+                </div>
+                <div class="flex gap-2 mb-2">
+                    <input type="email" id="newEmailInput" placeholder="ایمیل جدید..." class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    <button onclick="addNewEmail()" class="btn-neon px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap">افزودن</button>
+                </div>
+                <div id="emailGallery" class="flex flex-col gap-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL درخواست پروژه جدید (جدید) -->
+    <!-- ========================================== -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 relative">
+            <button onclick="closeProjectRequest()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+            <div class="text-center">
+                <h3 class="text-2xl font-black text-gray-800">ثبت درخواست پروژه</h3>
+                <p class="text-sm text-gray-500 mt-2">درخواست پروژه یا در روبیکا یا در اینستاگرام</p>
+            </div>
+            
+            <div class="flex flex-col gap-4 pt-2">
+                <a href="https://www.instagram.com/artinpla?igsh=eW1mamJscGpnNzhs" target="_blank" onclick="showToast('درخواست شما به اینستاگرام ارسال شد!')" class="flex items-center justify-center gap-3 px-6 py-4 bg-gray-900 text-white rounded-xl font-bold transition-transform hover:-translate-y-1 hover:shadow-lg border border-gray-800 w-full">
+                    <i class="ri-instagram-line text-xl text-brand-500"></i>
+                    <span>ثبت درخواست در اینستاگرام</span>
+                </a>
+                
+                <a href="https://rubika.ir/artin_pla" target="_blank" onclick="showToast('درخواست شما به روبیکا ارسال شد!')" class="flex items-center justify-center gap-3 px-6 py-4 btn-neon rounded-xl font-bold w-full">
+                    <i class="ri-message-2-line text-xl"></i>
+                    <span>ثبت درخواست در روبیکا</span>
+                </a>
+                
+                <p class="text-[10px] text-gray-400 text-center mt-2">* پس از ارسال درخواست، در سریع‌ترین زمان با شما تماس گرفته می‌شود.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- کانتینر پیام (Toast) -->
+    <!-- ========================================== -->
+    <div id="toast-container"></div>
+
+    <!-- Swiper Script -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    
+    <script>
+        // ==========================================
+        // 1. تنظیمات اسلایدر
+        // ==========================================
+        new Swiper('.hero-swiper', {
+            loop: true, autoplay: { delay: 5000, disableOnInteraction: false },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        });
+
+        // ==========================================
+        // 2. سیستم ورود (Login & Logout)
+        // ==========================================
+        let selectedProfilePic = null;
+        function openLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+        function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); document.body.style.overflow = ''; }
+        function handleProfilePicUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) { selectedProfilePic = e.target.result; document.getElementById('profilePicPreview').src = selectedProfilePic; };
+                reader.readAsDataURL(file);
+            }
+        }
+        function login() {
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (!email || !username || !password) return alert('لطفاً تمام فیلدها را پر کنید!');
+            if (!selectedProfilePic) selectedProfilePic = document.getElementById('profilePicPreview').src;
+            
+            localStorage.setItem('pla_user_email', email);
+            localStorage.setItem('pla_username', username);
+            localStorage.setItem('pla_profile_pic', selectedProfilePic);
+            if (!localStorage.getItem('pla_emails')) localStorage.setItem('pla_emails', JSON.stringify([]));
+
+            closeLoginModal();
+            updateUIBasedOnLogin();
+            alert(`خوش آمدید ${username}!`);
+        }
+        function updateUIBasedOnLogin() {
+            const savedUsername = localStorage.getItem('pla_username');
+            const savedProfilePic = localStorage.getItem('pla_profile_pic');
+            if (savedUsername) {
+                document.getElementById('loginActions').classList.add('hidden');
+                document.getElementById('loggedInActions').classList.remove('hidden');
+                document.getElementById('loggedInUsername').textContent = savedUsername;
+                document.getElementById('userProfileImg').src = savedProfilePic || 'https://ui-avatars.com/api/?name=User&background=random&size=128';
+            }
+        }
+        function logout() {
+            localStorage.removeItem('pla_user_email'); localStorage.removeItem('pla_username'); localStorage.removeItem('pla_profile_pic'); localStorage.removeItem('pla_emails');
+            document.getElementById('loggedInActions').classList.add('hidden');
+            document.getElementById('loginActions').classList.remove('hidden');
+            document.getElementById('email').value = ''; document.getElementById('username').value = ''; document.getElementById('password').value = '';
+            selectedProfilePic = null; document.getElementById('profilePicPreview').src = 'https://ui-avatars.com/api/?name=User&background=random&size=128';
+            closeProfileModal();
+        }
+        window.onload = function() { updateUIBasedOnLogin(); };
+        document.getElementById('loginModal').addEventListener('click', function(e) { if (e.target === this) closeLoginModal(); });
+
+        // ==========================================
+        // 3. سیستم جستجوی هوشمند
+        // ==========================================
+        const siteData = [
+            { title: 'طراحی سایت هنری', url: '#works' }, { title: 'طراحی سایت شرکتی', url: '#works' },
+            { title: 'هویت بصری و لوگو', url: '#works' }, { title: 'تایپوگرافی و پوستر', url: '#works' },
+            { title: 'سئو و بهینه‌سازی', url: '#works' }, { title: 'درباره ARTIN PLA', url: '#about' },
+            { title: 'ارتباط با ما (تماس)', url: '#contact' }, { title: 'اینستاگرام', url: 'https://www.instagram.com/artinpla' },
+            { title: 'روبیکا', url: 'https://rubika.ir/artin_pla' }
+        ];
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            searchDropdown.innerHTML = '';
+            if (query.length === 0) { searchDropdown.classList.add('hidden'); return; }
+            const results = siteData.filter(item => item.title.toLowerCase().includes(query));
+            if (results.length > 0) {
+                searchDropdown.classList.remove('hidden');
+                results.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-brand-500 hover:text-white cursor-pointer transition-all text-sm text-gray-700';
+                    const isExternal = item.url.startsWith('http');
+                    div.innerHTML = `<i class="ri-search-line text-brand-500 group-hover:text-white"></i><span>${item.title}</span>`;
+                    div.addEventListener('click', function() {
+                        searchDropdown.classList.add('hidden'); searchInput.value = '';
+                        if (isExternal) window.open(item.url, '_blank');
+                        else { const target = document.querySelector(item.url); if (target) target.scrollIntoView({ behavior: 'smooth' }); }
+                    });
+                    searchDropdown.appendChild(div);
+                });
+            } else {
+                searchDropdown.classList.remove('hidden');
+                const div = document.createElement('div');
+                div.className = 'px-3 py-4 text-center text-xs text-gray-500 flex flex-col gap-2';
+                div.innerHTML = `<i class="ri-error-warning-line text-2xl text-brand-500"></i><span>نتیجه‌ای برای "<strong>${query}</strong>" یافت نشد.</span><span class="text-[10px] text-gray-400">لطفاً درباره سایت (طراحی، برندینگ، تماس) جستجو کنید.</span>`;
+                searchDropdown.appendChild(div);
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) searchDropdown.classList.add('hidden');
+        });
+
+        // ==========================================
+        // 4. مودال پروفایل و کارت 3D
+        // ==========================================
+        function openProfileModal() {
+            const username = localStorage.getItem('pla_username');
+            const email = localStorage.getItem('pla_user_email');
+            const pic = localStorage.getItem('pla_profile_pic');
+            let hash = 0; for (let i = 0; i < username.length; i++) hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            const lastFour = String(Math.abs(hash)).slice(0, 4).padStart(4, '0');
+            document.getElementById('profileCardName').textContent = username;
+            document.getElementById('profileCardEmail').textContent = email;
+            document.getElementById('profileCardImg').src = pic;
+            document.getElementById('cardNumber').textContent = `****-****-****-${lastFour}`;
+            renderEmailGallery();
+            document.getElementById('profileModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+            document.getElementById('cardInner').classList.remove('is-flipped');
+        }
+        function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); document.body.style.overflow = ''; }
+        function flipCard() { document.getElementById('cardInner').classList.toggle('is-flipped'); }
+        function saveProfile() { document.getElementById('cardInner').classList.remove('is-flipped'); }
+        function deleteAccount() {
+            if (confirm('آیا از حذف حساب کاربری خود مطمئن هستید؟')) { logout(); alert('حساب کاربری شما حذف شد.'); }
+        }
+        const card = document.getElementById('profileCard');
+        if (card) {
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                const centerX = rect.width / 2; const centerY = rect.height / 2;
+                this.style.transform = `rotateX(${(y - centerY) / centerY * -8}deg) rotateY(${(x - centerX) / centerX * 8}deg)`;
+            });
+            card.addEventListener('mouseleave', function() { this.style.transform = 'rotateX(0deg) rotateY(0deg)'; });
+        }
+        document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target === this) closeProfileModal(); });
+
+        // ==========================================
+        // 5. گالری ایمیل‌ها
+        // ==========================================
+        function getEmails() { const emails = localStorage.getItem('pla_emails'); return emails ? JSON.parse(emails) : []; }
+        function renderEmailGallery() {
+            const container = document.getElementById('emailGallery');
+            const emails = getEmails(); container.innerHTML = '';
+            if (emails.length === 0) { container.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">هیچ ایمیل اضافی ثبت نشده است.</p>'; return; }
+            emails.forEach((email, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg border border-gray-200';
+                div.innerHTML = `<span class="text-sm text-gray-700">${email}</span><button onclick="deleteEmail(${index})" class="text-xs text-red-400 hover:text-red-600 transition-colors"><i class="ri-delete-bin-line text-lg"></i></button>`;
+                container.appendChild(div);
+            });
+        }
+        function addNewEmail() {
+            const input = document.getElementById('newEmailInput');
+            const email = input.value.trim();
+            if (!email) return alert('لطفاً یک ایمیل معتبر وارد کنید!');
+            const emails = getEmails();
+            if (emails.includes(email)) return alert('این ایمیل قبلاً ثبت شده است!');
+            emails.push(email); localStorage.setItem('pla_emails', JSON.stringify(emails));
+            input.value = ''; renderEmailGallery();
+        }
+        function deleteEmail(index) { const emails = getEmails(); emails.splice(index, 1); localStorage.setItem('pla_emails', JSON.stringify(emails)); renderEmailGallery(); }
+
+        // ==========================================
+        // 6. سیستم درخواست پروژه جدید و پیام (Toast)
+        // ==========================================
+        function openProjectRequest() {
+            document.getElementById('projectModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeProjectRequest() {
+            document.getElementById('projectModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('projectModal').addEventListener('click', function(e) {
+            if (e.target === this) closeProjectRequest();
+        });
+
+        // تابع نمایش پیام نئونی (Toast)
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-item show';
+            toast.innerHTML = `
+                <i class="ri-check-line text-brand-500 text-xl"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            // حذف پیام بعد از 3 ثانیه
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
